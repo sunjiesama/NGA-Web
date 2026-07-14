@@ -1,9 +1,11 @@
 // ==UserScript==
 // @name         NGA 直接删除广告 DOM
 // @namespace    https://nga.cn/
-// @version      0.3.4
+// @version      0.3.5
 // @description  删除 NGA 广告 DOM，移除 Tagtic 广告 script，并跳过 NGA 插页广告。
 // @author       xianfish-codex
+// @downloadURL  https://raw.githubusercontent.com/sunjiesama/NGA-Web/main/NGA-AdCleaner.user.js
+// @updateURL    https://raw.githubusercontent.com/sunjiesama/NGA-Web/main/NGA-AdCleaner.user.js
 // @match        http://nga.cn/*
 // @match        https://nga.cn/*
 // @match        http://*.nga.cn/*
@@ -59,6 +61,8 @@
   // =============================================================================
   // 广告域名黑名单：当前页面已观察到 hi4fun.com、new.wan.360.cn。
   const AD_HOST_KEYWORDS = [
+    'g1.tagtic.cn',
+    'ad-static-xg.tagtic.cn',
     'hi4fun.com',
     'new.wan.360.cn',
     'wan.360.cn',
