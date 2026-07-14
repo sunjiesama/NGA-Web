@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         NGA 直接删除广告 DOM
 // @namespace    https://nga.cn/
-// @version      0.3.3
-// @description  删除 NGA 广告 DOM，并在文档开始阶段直接移除 Tagtic 广告 script 标签。
+// @version      0.3.4
+// @description  删除 NGA 广告 DOM，移除 Tagtic 广告 script，并跳过 NGA 插页广告。
 // @author       xianfish-codex
 // @match        http://nga.cn/*
 // @match        https://nga.cn/*
@@ -16,6 +16,43 @@
 
 (() => {
   'use strict';
+
+  // =============================================================================
+  // 模块 0：NGA 插页广告跳过
+  // 职责：进入 /misc/adpage_insert*.html 时，立即回到其携带的 NGA 原始页面。
+  // =============================================================================
+  const NGA_AD_INTERSTITIAL_PATH_RE = /^\/misc\/adpage_insert(?:_\d+)?\.html$/i;
+  const NGA_TRUSTED_HOST_RE = /^(?:[a-z0-9-]+\.)?(?:nga\.cn|nga\.donews\.com|ngacn\.cc|178\.com|ngabbs\.com|bigccq\.cn)$/i;
+
+  function getNgaAdInterstitialTarget() {
+    if (!NGA_AD_INTERSTITIAL_PATH_RE.test(location.pathname)) return null;
+
+    // NGA 以 ?https://bbs.nga.cn/read.php?... 的形式携带原始跳转地址；
+    // 兼容其原页 getJump() 对可选数字前缀的处理。
+    const rawTarget = location.search.slice(1).replace(/^\d+/, '');
+    if (!rawTarget) return null;
+
+    try {
+      const target = new URL(rawTarget, location.href);
+      if (!/^https?:$/.test(target.protocol)) return null;
+      if (!NGA_TRUSTED_HOST_RE.test(target.hostname)) return null;
+      if (NGA_AD_INTERSTITIAL_PATH_RE.test(target.pathname)) return null;
+      return target.href;
+    } catch {
+      return null;
+    }
+  }
+
+  function bypassNgaAdInterstitial() {
+    const target = getNgaAdInterstitialTarget();
+    if (!target) return false;
+
+    location.replace(target);
+    return true;
+  }
+
+  // 在插页文档开始阶段结束当前脚本，避免执行插页广告的后续页面逻辑。
+  if (bypassNgaAdInterstitial()) return;
 
   // =============================================================================
   // 模块 1：共享匹配规则
