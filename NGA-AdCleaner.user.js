@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         NGA 直接删除广告 DOM
 // @namespace    https://nga.cn/
-// @version      0.3.5
+// @version      0.3.6
 // @description  删除 NGA 广告 DOM，移除 Tagtic 广告 script，并跳过 NGA 插页广告。
 // @author       xianfish-codex
 // @downloadURL  https://raw.githubusercontent.com/sunjiesama/NGA-Web/main/NGA-AdCleaner.user.js
@@ -226,6 +226,11 @@
   function isEmptyDarkPlaceholder(node) {
     if (!node || node.nodeType !== 1) return false;
     if (node === document.body || node === document.documentElement) return false;
+
+    // 表单控件的值不属于 textContent。NGA 快速回复区因此看起来像“空节点”，
+    // 同时还继承了深色边框，不能把包含交互控件的正常区域当成广告占位。
+    if (node.matches('input, textarea, select, button, [contenteditable]:not([contenteditable="false"])')) return false;
+    if (node.querySelector('input, textarea, select, button, [contenteditable]:not([contenteditable="false"])')) return false;
 
     const text = String(node.textContent || '').replace(/\s+/g, '').trim();
     if (text.length > 2) return false;
